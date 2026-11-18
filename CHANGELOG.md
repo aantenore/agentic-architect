@@ -7,7 +7,6 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Added
 
 - Plugin icon (`.claude-plugin/icon.png`).
-- Usage guide in the README: activation, request checklist, output types, depth and example prompts.
 
 ## [1.0.0] - 2026-11-18
 
