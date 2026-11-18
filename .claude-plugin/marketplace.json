@@ -1,0 +1,15 @@
+{
+  "name": "agentic-architect-marketplace",
+  "description": "Marketplace for the agentic-architect plugin",
+  "owner": {
+    "name": "Antonio Antenore",
+    "url": "https://github.com/aantenore"
+  },
+  "plugins": [
+    {
+      "name": "agentic-architect",
+      "source": "./",
+      "description": "Provider-neutral skill for designing, reviewing and building agentic and LLM applications."
+    }
+  ]
+}
