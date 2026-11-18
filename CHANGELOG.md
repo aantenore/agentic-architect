@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-11-18
+
+### Added
+
+- Plugin icon (`.claude-plugin/icon.png`).
+- Usage guide in the README: activation, request checklist, output types, depth and example prompts.
+
 ## [1.0.0] - 2026-11-18
 
 ### Added
@@ -13,4 +20,5 @@ All notable changes to this project are documented here. The format follows [Kee
 - Context engineering guides and example scripts adapted from Agent Skills for Context Engineering (MIT).
 - Claude Code plugin manifest and single-plugin marketplace.
 
+[1.0.1]: https://github.com/aantenore/agentic-architect/releases/tag/v1.0.1
 [1.0.0]: https://github.com/aantenore/agentic-architect/releases/tag/v1.0.0

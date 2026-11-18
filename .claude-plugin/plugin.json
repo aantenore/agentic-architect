@@ -1,7 +1,7 @@
 {
   "name": "agentic-architect",
   "displayName": "Agentic Architect",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Provider-neutral skill for designing, reviewing and building agentic and LLM applications: ownership and pattern selection, harness and tool design, context engineering, safety controls, evals and production readiness.",
   "author": {
     "name": "Antonio Antenore",
