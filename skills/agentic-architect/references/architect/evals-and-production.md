@@ -55,9 +55,33 @@ Automated evals are one input. A complete picture combines production monitoring
 
 Before launch, decide for production:
 - **Observability**: trace every model call and tool call with inputs, outputs, latency, tokens, cost and the versions of prompt, model and tools in use. Logging is also a legal requirement for high-risk systems in the EU (Article 12) [5].
-- **Reliability**: timeouts, bounded retries with backoff for transient errors, idempotent side effects so a retry cannot double-execute, and a step or token budget per task (OWASP LLM10 Unbounded Consumption) [3].
+- **Reliability**: timeouts, bounded retries with backoff for transient errors, idempotent side effects so a retry cannot double-execute, and a step or token budget per task (OWASP LLM10 Unbounded Consumption) [3]. Details below.
 - **Rollout**: start with shadow mode or a small share of traffic, compare against the current process, expand on evidence.
 - **Feedback loop**: production failures become new eval tasks, and recurring failures become validators, tools or documentation rather than more prompt text.
+
+### Online experiments
+
+Controlled experiments (A/B tests) on live traffic follow the general practice for online experimentation [10]. Conventions of this skill for LLM systems:
+- Write the hypothesis, the single primary metric and the guardrail metrics (cost, latency, safety, escalation rate) before starting.
+- Compute the sample size from the baseline rate, the smallest effect worth detecting and the required confidence, then derive the run time from real traffic; do not stop early when the result looks good.
+- Keep the input mix comparable between arms (randomize by user or session, stratify when traffic contains distinct populations) and run long enough to cover regular cycles in usage.
+- Use shadow runs first when a wrong answer is costly, so the change is measured without users seeing it.
+- Report effect size with its uncertainty; a small sample that "looks better" is not a result.
+
+### Reliability of model calls
+
+Facts from the Anthropic API documentation, which may change [6], [7], [9]:
+- Rate limits are tracked per model class on requests, input tokens and output tokens with continuous replenishment, so short bursts can be rejected even when the per-minute average is within limits; a sharp ramp in traffic can also be rejected.
+- A rate-limit response may carry a `retry-after` header; wait at least that long. Not every rate-limit error is retryable: one caused by a spend cap keeps failing until access is restored.
+- Overload and internal server errors are transient. The official SDKs retry a small number of times with exponential backoff and honour server hints on whether to retry; without an SDK, implement the same with a retry limit.
+- `max_tokens` is the absolute ceiling on generated tokens; a response that stops at the limit (stop reason `max_tokens`) may be truncated and must not be treated as complete.
+
+Design conventions of this skill:
+- **Classify errors before retrying**: retry transient errors with capped exponential backoff and jitter; fail fast on validation, authentication and quota errors.
+- **Add a circuit breaker** around the model provider and slow tools: after repeated failures, stop calling for a cool-down period, then let a trial request through; alert when it opens, and decide in advance what callers get meanwhile [8].
+- **Define a fallback chain** per step, for example another model tier, another region or provider route, a cached or templated answer, or a queued task with a human handoff. Each fallback must pass the same evals and controls as the primary path.
+- **Size `max_tokens` per step** from the measured output distribution, leaving room for reasoning tokens where they count toward the limit, and handle truncation explicitly.
+- **Smooth traffic**: queue and rate-limit on your side, ramp new workloads gradually, and keep cache hits high since cached input may count differently against limits.
 
 ## 7. Readiness verdict
 
@@ -73,3 +97,8 @@ A convention of this skill. Issue one of:
 3. OWASP Top 10 for LLM Applications 2025: https://genai.owasp.org/llm-top-10/
 4. Anthropic documentation, Models overview (model IDs, aliases and versioning): https://platform.claude.com/docs/en/about-claude/models/overview
 5. Regulation (EU) 2024/1689 (AI Act), Article 12 Record-keeping: https://eur-lex.europa.eu/eli/reg/2024/1689/oj
+6. Anthropic documentation, Errors: https://platform.claude.com/docs/en/api/errors
+7. Anthropic documentation, Rate limits: https://platform.claude.com/docs/en/api/rate-limits
+8. Martin Fowler, "CircuitBreaker": https://martinfowler.com/bliki/CircuitBreaker.html
+9. Anthropic documentation, Messages API (`max_tokens`, stop reasons): https://platform.claude.com/docs/en/api/messages
+10. Ron Kohavi, Diane Tang, Ya Xu, "Trustworthy Online Controlled Experiments: A Practical Guide to A/B Testing", Cambridge University Press (2020): https://experimentguide.com/

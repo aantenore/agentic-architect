@@ -34,10 +34,13 @@ Documented techniques [3]: allow the model to say it does not know; for long doc
 ## 4. Where controls run and how they fail
 
 Design conventions of this skill:
+- **The model's own safety behaviour is a baseline, not your policy.** Providers shape general values and refusals during training; Anthropic, for example, publishes the constitution that guides Claude's values and priorities, and it favours broad judgement over narrow rules [7]. Training has never seen your domain rules, tenant boundaries, approval limits or scripts. List every rule the application depends on and give each one an enforcement point in your own layers (prompt, validation, authorization, human review); a rule that lives in no layer is not enforced.
 - **Enforce in code, not in prompts.** Authorization, limits and approvals are checked by the harness or downstream system before execution. A prompt can describe a rule; it cannot enforce it (see LLM06 and LLM07 above).
 - **Fail closed by default.** If a guardrail, classifier, policy check or approval service errors or times out, the risky action does not run. Failing open is an explicit, documented exception, limited to low-impact and reversible actions, with an owner.
 - **Draft and commit are separate steps** for external messages, payments, deletions, security changes and regulated actions: the model prepares, code validates, a human or a policy approves, then code executes.
 - **Every tool call gets a recorded result**, including denials, timeouts and aborts, so the trace is complete and replayable.
+- **Identity and tenancy come from the server.** Derive the user, role and tenant from the authenticated session, never from text in the user message or model output; treat any client-supplied tenant identifier as a selector to verify, isolate data per tenant at the storage layer, and use per-tenant credentials or keys where isolation requires it [8].
+- **Pass the minimum data and keep it out of logs.** Send the model only the fields the step needs, prefer references over raw identifiers, and remove, mask or hash secrets and sensitive personal data before anything is logged; protect logs against tampering and restrict who can read them [9].
 
 ## 5. Human oversight
 
@@ -45,7 +48,15 @@ Design conventions of this skill:
 - Reviewers need to see the input, the proposed output or action, and the reason; otherwise review becomes rubber-stamping. The EU AI Act requires that people assigned to oversee high-risk systems can understand the system's capacities and limitations, remain aware of automation bias, correctly interpret output, and decide not to use it, override it or stop the system [4].
 - Record who approved what, when, against which policy version.
 
-## 6. Risk management frameworks
+## 6. Fairness and explainability
+
+NIST lists harmful bias among the risks of generative AI and describes trustworthy AI as fair with harmful bias managed, accountable and transparent, and explainable [5], [6]. Conventions of this skill that make this testable:
+- Look for bias in every input the system controls, not only in the model: data sources and retrieval corpus, instructions, examples, and the rules that route cases to different paths.
+- Measure outcomes per relevant group, not only in aggregate; an average can hide unequal treatment.
+- Log enough to reconstruct any single decision on request: inputs, retrieved context, routing choices, output, and the versions of model, prompt and tools, tied to one identifier and retained for the required period. Without reconstruction there is no reliable explanation to give an affected person, a reviewer or the team.
+- Decide in advance who can ask for an explanation and what each of them needs to see.
+
+## 7. Risk management frameworks
 
 **NIST AI Risk Management Framework (AI RMF 1.0)** [5] organizes risk work into four functions: Govern (culture, roles, policies), Map (context and risks), Measure (analysis, assessment, tracking) and Manage (prioritized response). It describes trustworthy AI as valid and reliable, safe, secure and resilient, accountable and transparent, explainable and interpretable, privacy-enhanced, and fair with harmful bias managed. The Generative AI Profile (NIST AI 600-1) lists risks specific to generative AI, including confabulation, data privacy, harmful bias and homogenization, human-AI configuration, information integrity, information security, intellectual property and value-chain and component integration [6].
 
@@ -60,7 +71,7 @@ Use the four functions as a coverage check: every identified risk should have an
 
 Use these as a filter at design time: determine whether the use case could fall into a prohibited or high-risk category before choosing an architecture, because the answer changes logging, oversight and documentation requirements.
 
-## 7. Compliance register (optional, for regulated or multi-team systems)
+## 8. Compliance register (optional, for regulated or multi-team systems)
 
 A design convention of this skill. One row per obligation:
 
@@ -77,3 +88,6 @@ A control without an owner and an evidence artifact is a claim, not a control. A
 4. Regulation (EU) 2024/1689 (AI Act), official text: https://eur-lex.europa.eu/eli/reg/2024/1689/oj
 5. NIST AI 100-1, Artificial Intelligence Risk Management Framework (AI RMF 1.0): https://doi.org/10.6028/NIST.AI.100-1 (overview: https://www.nist.gov/itl/ai-risk-management-framework)
 6. NIST AI 600-1, Generative Artificial Intelligence Profile: https://doi.org/10.6028/NIST.AI.600-1
+7. Anthropic, Claude's constitution: https://www.anthropic.com/constitution
+8. OWASP Cheat Sheet Series, Multi-Tenant Security: https://cheatsheetseries.owasp.org/cheatsheets/Multi_Tenant_Security_Cheat_Sheet.html
+9. OWASP Cheat Sheet Series, Logging: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html

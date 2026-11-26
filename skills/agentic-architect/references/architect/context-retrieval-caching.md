@@ -31,6 +31,12 @@ Decision convention of this skill:
 
 When retrieval is needed, adding chunk-specific context before embedding and combining embeddings with lexical (BM25) search reduced retrieval failures in Anthropic's published experiments, and reranking reduced them further [2]. Measure on your own data before adopting any of these steps.
 
+Chunk size, chunk boundaries and overlap all affect retrieval quality, and there is no universal setting [2]. Conventions of this skill:
+- Choose boundaries from the structure of each document type: split documents with explicit sections along those sections so each unit stays whole; split free-form prose at paragraph or topic boundaries rather than at a fixed length that cuts ideas in half.
+- Keep the document title, section path, version and access metadata with every chunk; they feed contextual retrieval, filtering and citations.
+- Choose the index from the queries: exact identifiers need lexical search, conceptual questions need embeddings; a mixed query set is the usual reason for a hybrid index.
+- Build a retrieval eval (questions with the expected source documents, scored on recall at k) before tuning any of these settings.
+
 Retrieved content is untrusted input: documents in a vector store can carry injected instructions, and access control must hold at retrieval time too (OWASP LLM08 Vector and Embedding Weaknesses) [5].
 
 ## 3. Prompt caching
@@ -57,6 +63,23 @@ Further levers [4]:
 
 Cost and latency sizing (convention of this skill): model cost on the measured distribution of input and output tokens per task, including retries and cache behaviour, not on an average request; set latency targets on a high percentile (for example p95), not on the mean.
 
+## 5. Prompt techniques
+
+Pick the technique from the task, starting with the cheapest. From Anthropic's prompting guidance [7], [8]:
+
+| Technique | Use when | Cost and caveats |
+|---|---|---|
+| Clear, direct instructions | Always first: state the task, the audience, the output format and the constraints explicitly; use numbered steps when order or completeness matters | A useful test is whether a colleague with no context could follow the prompt |
+| Examples (few-shot) | Format, tone or structure is easier to show than to describe | Use a few (the guidance suggests 3 to 5), relevant and varied, clearly delimited; similar examples teach unintended patterns |
+| Step-by-step reasoning or extended thinking | Multi-step analysis, math, code, decisions that depend on a reasoning path | Adds output tokens and latency; skip it for simple tasks and prefer general "think it through" guidance or an effort setting over hand-written step plans |
+| Defined output format (template, XML or JSON) | Downstream code parses the result | An example of the format works better than an abstract description [8] |
+| Schema-constrained output (structured outputs or strict tool use) | Output must always match a schema | Where the provider supports it, constrained decoding guarantees schema conformance in normal cases; refusals and responses cut off at the token limit can still break it, so check the stop reason [9] |
+
+Conventions of this skill:
+- **Put rules in the structure, not only in the prose.** A constraint the output format enforces (allowed values, required fields, no field for content that must never appear) holds better than a sentence in the role description, and code can validate it before anything is sent.
+- **Keep instructions about what to do separate from data**, and keep the stable part of the prompt first so it can be cached (section 3).
+- **Check each prompt change with the eval suite**; a technique that helps one model or task can hurt another.
+
 ## Sources
 
 1. Anthropic, "Effective context engineering for AI agents": https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
@@ -65,3 +88,6 @@ Cost and latency sizing (convention of this skill): model cost on the measured d
 4. Anthropic documentation, Choosing a model: https://platform.claude.com/docs/en/about-claude/models/choosing-a-model
 5. OWASP Top 10 for LLM Applications 2025: https://genai.owasp.org/llm-top-10/
 6. Anthropic, "Building effective agents" (Routing): https://www.anthropic.com/engineering/building-effective-agents
+7. Anthropic documentation, Prompting best practices: https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/be-clear-and-direct
+8. Anthropic documentation, Increase output consistency: https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/increase-consistency
+9. Anthropic documentation, Structured outputs: https://platform.claude.com/docs/en/build-with-claude/structured-outputs

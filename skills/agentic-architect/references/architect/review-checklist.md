@@ -12,6 +12,9 @@ Answer each item yes, no or not applicable. For every "no", give the consequence
 - [ ] The simplest pattern that could work was considered first, and each move to a more complex pattern names its evidence.
 - [ ] An agent is used only where the path cannot be enumerated and errors are recoverable; a multi-agent design is justified by context or permission limits, not by preference.
 - [ ] Any framework in use is understood well enough to debug the prompts and calls it makes.
+- [ ] Every requirement traces to a source; unconfirmed assumptions are labelled with an owner (see `lifecycle-and-operations.md`).
+- [ ] Feasibility was checked against context size, missing knowledge, error tolerance and cost at production volume, and the deciding constraint is named.
+- [ ] In fan-out designs, synthesis checks that every dispatched unit returned, and missing or failed units are retried or reported.
 
 ## Group 2: Tools and context (see `context-retrieval-caching.md`)
 
@@ -21,6 +24,8 @@ Answer each item yes, no or not applicable. For every "no", give the consequence
 - [ ] Context carries only what the current step needs; long tasks use compaction, notes or sub-agents deliberately.
 - [ ] Prompt prefix is ordered for caching (stable content first); cache hit rate is measured.
 - [ ] Model per step is chosen and confirmed by evals; cost is modelled on the token distribution, latency on a high percentile.
+- [ ] Prompt technique matches the task (instructions first, examples for format, reasoning only where it helps); hard rules are enforced by the output structure and validated in code.
+- [ ] Chunking follows document structure, the index type follows the query mix, and a retrieval eval exists.
 
 ## Group 3: Safety (see `safety-controls.md`)
 
@@ -31,6 +36,9 @@ Answer each item yes, no or not applicable. For every "no", give the consequence
 - [ ] Draft and commit are separate for external, financial, destructive or regulated actions.
 - [ ] Human reviewers see input, proposed action and reason; approvals are recorded.
 - [ ] Regulatory classification (for example under the EU AI Act) was checked before the architecture was fixed.
+- [ ] Every domain rule has an enforcement point in the application; none relies on the model's general safety training.
+- [ ] Identity and tenant come from the authenticated session; sensitive data is minimized in context and removed or masked before logging.
+- [ ] Outcomes are measured per relevant group, and any single decision can be reconstructed from the logs.
 
 ## Group 4: Evals and operations (see `evals-and-production.md`)
 
@@ -41,12 +49,19 @@ Answer each item yes, no or not applicable. For every "no", give the consequence
 - [ ] Traces record every model and tool call with versions, tokens, latency and cost.
 - [ ] Timeouts, bounded retries, idempotent side effects and per-task budgets are in place.
 - [ ] Rollout is staged (shadow or small share first) and production failures feed new eval tasks.
+- [ ] Errors are classified before retry; a circuit breaker and a tested fallback exist for the model provider and slow tools; truncation at the token limit is handled.
+- [ ] Online experiments define the primary metric, guardrail metrics and sample size before they start.
+- [ ] Service objectives come from user-relevant indicators; each indicator has a threshold, owner and action, including alerts for slow quality drift.
+- [ ] A baseline of the target business metric was measured before launch.
 
 ## Group 5: Governance (only for regulated, high-impact or multi-team systems)
 
 - [ ] Every risk has an owner, a context description, a metric or test, and a response (NIST AI RMF Govern, Map, Measure, Manage).
 - [ ] Obligations are tracked in a register with control, owner and evidence.
-- [ ] Decisions that are costly to reverse have a decision record.
+- [ ] Decisions that are costly to reverse have a decision record, including rejected alternatives.
+- [ ] Reviews required on a schedule (audits, residency confirmation) are planned independently of metrics.
+- [ ] Processing region is set explicitly for every hosting route, and logs, caches and backups stay within the same boundary.
+- [ ] Documentation lets an engineer who was not involved make a safe change.
 
 ## Decision record template
 

@@ -9,7 +9,8 @@ The skill guides a design from the problem frame to a reviewable result, loading
 - **Ownership and pattern**: which steps belong to code, the model or a human; single augmented call, workflow, agent or multi-agent, with the evidence required to move up a level.
 - **Context and models**: retrieval versus live state, context budgeting, compaction, prompt caching order, model choice per step, cost and latency sizing.
 - **Safety controls**: OWASP Top 10 for LLM Applications, prompt-injection defences, fail-closed enforcement in code, human oversight, NIST AI RMF and EU AI Act as design filters.
-- **Evals and readiness**: success criteria, code, model and human graders, capability and regression suites, change gates, observability, staged rollout.
+- **Evals and readiness**: success criteria, code, model and human graders, capability and regression suites, change gates, online experiments, retries, circuit breakers and fallbacks, observability, staged rollout.
+- **Lifecycle and operations**: requirements and assumptions, feasibility, service objectives and alerting, handover documentation, measuring value, data residency, runbooks, team adoption.
 - **Harness implementation**: agent loop, tool contracts and permissions, memory, planning, Skills and MCP, with an MVP blueprint template.
 - **Review**: a checklist and an architecture decision record template.
 

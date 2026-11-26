@@ -61,7 +61,7 @@ Run the stages your depth requires, in this order, keeping each output short bec
 
 | Stage | Question | Read | Output |
 |---|---|---|---|
-| Frame | What domain, autonomy, risk, state duration, tool surface and proof of completion? (section 6) | none | Short problem frame and chosen depth |
+| Frame | What domain, autonomy, risk, state duration, tool surface and proof of completion? Is it feasible? (section 6) | `references/architect/lifecycle-and-operations.md` §1–2 when requirements are vague | Short problem frame, assumptions and chosen depth |
 | Ownership | Which steps belong to code, model, human? | `references/architect/patterns-and-decomposition.md` | Ownership table |
 | Pattern | Single call, workflow, agent or multi-agent? Which packaging? | same file | Pattern plus the evidence that decides it |
 | Context and models | Retrieval or tools, context strategy, caching order, model per step, cost and latency | `references/architect/context-retrieval-caching.md` | Architecture sketch |
@@ -69,6 +69,7 @@ Run the stages your depth requires, in this order, keeping each output short bec
 | Evals and readiness | Success criteria, graders, gates, observability, rollout | `references/architect/evals-and-production.md` | Eval plan and readiness verdict |
 | Harness | Loop, tools, permissions, context, memory, prompts | `references/harness/`, `references/context-engineering/` (section 5) | MVP blueprint or code plan |
 | Review | Does the whole design hold? | `references/architect/review-checklist.md` | Checklist result and decision records |
+| Operate and hand over | Service objectives, alerts, documentation, value, support | `references/architect/lifecycle-and-operations.md` | Operating plan (Standard and Full depth) |
 
 Rules:
 - Decide ownership and pattern before writing harness code.
@@ -92,10 +93,11 @@ Paths are relative to this skill directory. `ce/<name>` means `references/contex
 
 | Problem | Read |
 |---|---|
-| Who owns each step; workflow vs agent vs multi-agent; framework choice; tool design principles | `references/architect/patterns-and-decomposition.md` |
-| Context budget, retrieval vs live state, prompt caching, model choice, cost and latency sizing | `references/architect/context-retrieval-caching.md` |
-| OWASP LLM risks, prompt injection, confabulation, fail-closed, human oversight, NIST AI RMF, EU AI Act, compliance register | `references/architect/safety-controls.md` |
-| Success criteria, graders, capability vs regression suites, change gates, observability, rollout, readiness | `references/architect/evals-and-production.md` |
+| Who owns each step; workflow vs agent vs multi-agent; fan-out and synthesis; framework choice; tool design principles | `references/architect/patterns-and-decomposition.md` |
+| Context budget, retrieval vs live state, chunking and indexing, prompt caching, prompt techniques and output structure, model choice, cost and latency sizing | `references/architect/context-retrieval-caching.md` |
+| OWASP LLM risks, prompt injection, confabulation, model safety vs application policy, identity and tenancy, logging hygiene, fail-closed, human oversight, fairness and decision reconstruction, NIST AI RMF, EU AI Act, compliance register | `references/architect/safety-controls.md` |
+| Success criteria, graders, capability vs regression suites, change gates, observability, online experiments, retries, circuit breakers, fallbacks, rollout, readiness | `references/architect/evals-and-production.md` |
+| Requirements and assumptions, feasibility, explaining decisions, service objectives and alerting, handover documentation, measuring value, hosting region, runbooks, team adoption | `references/architect/lifecycle-and-operations.md` |
 | Review a design; write a decision record | `references/architect/review-checklist.md` |
 
 ### Harness

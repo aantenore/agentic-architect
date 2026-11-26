@@ -68,6 +68,20 @@ Agents are typically models using tools in a loop, so the tool set and its docum
 
 Implementation detail lives in `../harness/tools-and-permissions.md` and `../context-engineering/tool-design/guide.md`.
 
+## 7. Fan-out and synthesis
+
+Anthropic's description of its multi-agent research system gives the public baseline for orchestrator-worker designs [6]:
+- A lead agent plans, starts workers with separate context windows that run in parallel, and combines their findings.
+- Each worker needs a clear objective, an output format, guidance on tools and sources, and explicit boundaries; vague delegation produced duplicated or missing work.
+- Agents are stateful and errors compound, so the system needs to resume from where a failure happened (retries plus checkpoints) rather than restart, and the agent should be told when a tool fails.
+- Multi-agent runs used roughly 15 times the tokens of a chat interaction in that report; the pattern pays off for valuable, parallelizable work and fits poorly where workers depend on each other.
+
+Design conventions of this skill that follow:
+- **Account for every unit.** The coordinator holds the list of units it dispatched; synthesis compares returned results against that list in code, and a missing, failed or empty result is retried or reported as a gap. A summary that silently omits a unit looks complete and is wrong.
+- **Make workers return structured results** (status, result, sources) so completeness and failures can be checked without reading prose.
+- **Propagate one trace or correlation id** to every worker so a single run can be reconstructed end to end.
+- **Gate irreversible actions after synthesis**, not inside individual workers, and apply the same approval rules as a single-agent design (`safety-controls.md`).
+
 ## Sources
 
 1. Anthropic, "Building effective agents": https://www.anthropic.com/engineering/building-effective-agents
@@ -75,3 +89,4 @@ Implementation detail lives in `../harness/tools-and-permissions.md` and `../con
 3. OWASP Top 10 for LLM Applications 2025 (LLM05 Improper Output Handling, LLM06 Excessive Agency): https://genai.owasp.org/llm-top-10/
 4. Anthropic, "Writing effective tools for agents": https://www.anthropic.com/engineering/writing-tools-for-agents
 5. Regulation (EU) 2024/1689 (AI Act), Article 14 Human oversight: https://eur-lex.europa.eu/eli/reg/2024/1689/oj
+6. Anthropic, "How we built our multi-agent research system": https://www.anthropic.com/engineering/multi-agent-research-system
